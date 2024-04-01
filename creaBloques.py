@@ -18,10 +18,10 @@ encabezado = list(df_original.columns)
 
 # Dividir en bloques de 500 filas
 bloques = [df_original[i:i+filas] for i in range(0, len(df_original), filas)]
-ruta=os.getcwd()#obtenermos la ruta de ejecucion
+ # Obtener la ruta actual de la carpeta
+ruta = os.path.abspath(f"{archivo_excel}")
 # Reemplaza las barras invertidas con barras normales
-ruta = ruta.replace("\\", '/')
-ruta=ruta.replace('2.BD LIMPIA', 'Bloques')
+ruta=ruta.replace(f'2.BD LIMPIA\\{archivo_excel}', '3.Bloques')
 
 carpeta_bloques=ruta  # Carpeta donde se guardarán los bloques
 # Iterar sobre los bloques y guardar en nuevos archivos
@@ -30,7 +30,10 @@ for i, bloque in enumerate(bloques):
     nomenclatura= f"B{Cifra}.xlsx"  # Nombre del archivo con el número de bloque
 
     bloque.columns = encabezado  # Asignar el mismo encabezado que el original
-    nombre_archivo = f'{carpeta_bloques}{archivo_base}{nomenclatura}'
+
+    nombre_archivo = f'{carpeta_bloques}\\{archivo_base}{nomenclatura}'
+    print(nombre_archivo)
+    
     bloque.to_excel(nombre_archivo, index=False)  # Guardar el bloque en un archivo Excel
 
     print(f"Guardado  {archivo_base+nomenclatura} con {len(bloque)} filas.")
