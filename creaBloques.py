@@ -1,12 +1,11 @@
 
-
+import os
 import pandas as pd
 # Lee el archivo Excel completo
 archivo_base = input('Ingrese el nombre del archivo (sin extensión): ')  # Nombre base del archivo
 archivo_excel = f"{archivo_base}.xlsx"  # Nombre del archivo con extensión
 print('si no ingresas valor, se crearan bloques de 500')
 filas=input('ingrese numero de filas de cada bloque: ')
-print(filas)
 if filas == '':
     filas=500
 else:
@@ -17,10 +16,14 @@ df_original = pd.read_excel(archivo_excel)
 # Obtener el encabezado
 encabezado = list(df_original.columns)
 
-# Dividir en bloques de 100 filas
+# Dividir en bloques de 500 filas
 bloques = [df_original[i:i+filas] for i in range(0, len(df_original), filas)]
-carpeta_bloques = 'C:/Users/Raul/OneDrive - INDOTECH SAC/Proyecto/Bloques/'  # Carpeta donde se guardarán los bloques
+ruta=os.getcwd()#obtenermos la ruta de ejecucion
+# Reemplaza las barras invertidas con barras normales
+ruta = ruta.replace("\\", '/')
+ruta=ruta.replace('2.BD LIMPIA', 'Bloques')
 
+carpeta_bloques=ruta  # Carpeta donde se guardarán los bloques
 # Iterar sobre los bloques y guardar en nuevos archivos
 for i, bloque in enumerate(bloques):
     Cifra=str(i+1).zfill(4)
