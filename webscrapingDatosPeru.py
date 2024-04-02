@@ -16,8 +16,9 @@ options.binary_location = brave_path
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options )
 listaRuc=[]
 def creaExcel(listaRuc):
+    print(len(listaRuc))
     global NumeroArchivo
-    if len(listaRuc) >= 10:    
+    if len(listaRuc) >=10000:    
         #debido a la cantidad demora en convertir a excel
         Datosperu=pd.DataFrame(listaRuc)
         Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
@@ -27,12 +28,12 @@ def creaExcel(listaRuc):
         listaRuc=[]
         return listaRuc
 
-NumeroArchivo=1
+NumeroArchivo=2
 global NumeroArvhivo
 
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
-nActividad=2
+nActividad=4
 try:
     #este try itera en las actividades 
     while True:
@@ -48,7 +49,7 @@ try:
             #este try itera en las empresas de cada ciiu de cada actidad
             pagigaCIIU=driver.current_url
             #este try intenta iterar en cada ciiu de cada actividad
-            nCIIU=1
+            nCIIU=8
             while True:
                 ########
                 #CODIGO BASURA
@@ -58,9 +59,9 @@ try:
 
                 driver.find_element(By.XPATH,f'//*[@id="categorias"]/div[3]/div[{nCIIU}]/div/a').click()
                 nCIIU+=1
-                nEmpresa=1
+                nEmpresa=22
                 try:
-                    npagina=2#inicio de pagina por default
+                    npagina=26#inicio de pagina por default
                     paginador=driver.current_url#obtiene el url de de la pagina donde se encuentran listadas las empresas
                     condicion=True
                     while condicion:
@@ -83,15 +84,11 @@ try:
                                 "ruc": ruc,
                                 "razon social": razon_social,
                                 "nombre comercial": nombre_comercial
-
                                 }
                             listaRuc.append(datos)
-                            
                             nEmpresa+=1
                             print('     ',datos)
                         except:
-                            nuevalista = creaExcel(listaRuc)
-                            listaRuc=nuevalista
                             ulrSiguiente=paginador.replace('.php',f'-pagina-{npagina}.php')
                             driver.get(ulrSiguiente)
                             npagina+=1
@@ -107,7 +104,9 @@ try:
                                 #reiniciamos el valor para iterar desde el inicio de la lista de empresas
                                 nEmpresa=1
                 except:
-                    print('son todas las empresas del la primera pagina')
+                    nuevaLista=creaExcel(listaRuc)
+                    listaRuc=nuevaLista
+                    print('son todas las empresas del CIIU')
                     #aqui debemos pasar al siguiente pagina, por el moneto solo damos 'atras'
         except:
             print('esas son todos los ciiu de la actividad\nregresamos a la pagina anterios')
