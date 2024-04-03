@@ -1,10 +1,10 @@
-
+import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import pandas as pd
-
+inicio=time.time()
 
 # Define Brave path
 brave_path = "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe"
@@ -15,25 +15,10 @@ options.binary_location = brave_path
 #driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options )
 listaRuc=[]
-def creaExcel(listaRuc):
-    print(len(listaRuc))
-    global NumeroArchivo
-    if len(listaRuc) >=10000:    
-        #debido a la cantidad demora en convertir a excel
-        Datosperu=pd.DataFrame(listaRuc)
-        Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
-        print(f'de creo un excel de {len(listaRuc)} filas')
-        print(f'la secuencia debe seguien el:\n actividad: {nActividad}\nCIIU:{nCIIU}\nempresa: {nEmpresa}\n Pagina: {npagina+1}')
-        NumeroArchivo+=1
-        listaRuc=[]
-        return listaRuc
-
-NumeroArchivo=2
-global NumeroArvhivo
-
+NumeroArchivo=3
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
-nActividad=3
+nActividad=11
 try:
     #este try itera en las actividades 
     while True:
@@ -49,7 +34,7 @@ try:
             #este try itera en las empresas de cada ciiu de cada actidad
             pagigaCIIU=driver.current_url
             #este try intenta iterar en cada ciiu de cada actividad
-            nCIIU=1
+            nCIIU=7
             while True:
                 ########
                 #CODIGO BASURA
@@ -87,6 +72,20 @@ try:
                             # Verificar si hay empresas en la nueva página
                             empresas_en_pagina = driver.find_elements(By.XPATH, '//*[@id="categorias"]/div[3]/div')
                             if len(empresas_en_pagina) == 0:
+                                if len(listaRuc) >=10000:    
+                                    #debido a la cantidad demora en convertir a excel
+                                    Datosperu=pd.DataFrame(listaRuc)
+                                    Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
+                                    print(f'Se creo un excel de {len(listaRuc)} filas')
+                                    # Abre un archivo en modo de apéndice ('a' para agregar).
+                                    # Si el archivo no existe, se creará. Si existe, se escribirá al final.
+                                    with open('punto de partida.txt', 'w') as archivo:
+                                        # Escribe líneas en el archivo usando el método write().
+                                        archivo.write(f'la secuencia debe seguien el:\n actividad: {nActividad}\nCIIU:{nCIIU}\nPagina: {npagina}')
+                                        # El archivo se cierra automáticamente después del bloque "with".
+                                        print("Contenido agregado al archivo.")
+                                    NumeroArchivo+=1
+                                    listaRuc=[]
                                 print("No hay más empresas en las siguientes páginas.")
                                 #regresar a la pagina donde estan los ciiu
                                 driver.get(pagigaCIIU)
@@ -96,19 +95,12 @@ try:
                                 #reiniciamos el valor para iterar desde el inicio de la lista de empresas
                                 nEmpresa=1
                 except:
-                    nuevaLista=creaExcel(listaRuc)
-                    listaRuc=nuevaLista
                     print('son todas las empresas del CIIU')
                     #aqui debemos pasar al siguiente pagina, por el moneto solo damos 'atras'
         except:
             print('esas son todos los ciiu de la actividad\nregresamos a la pagina anterios')
-            driver.get('https://www.datosperu.org/')
-            nuevaLista=creaExcel(listaRuc)
-            listaRuc=nuevaLista
+            driver.get('https://www.datosperu.org/')      
 except:
     print('esas son todas las actividades')
-
-
-
-
-print('fin')
+fin=time.time()
+print(f'el tiempo de ejecucion: {fin-inicio}')
