@@ -23,7 +23,7 @@ def creaExcel(listaRuc):
         Datosperu=pd.DataFrame(listaRuc)
         Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
         print(f'de creo un excel de {len(listaRuc)} filas')
-        print(f'la secuencia debe seguien el:\n actividad: {nActividad+1}\nCIIU:{nCIIU+1}\nempresa: {nEmpresa+1}\n Pagina: {npagina+1}')
+        print(f'la secuencia debe seguien el:\n actividad: {nActividad}\nCIIU:{nCIIU}\nempresa: {nEmpresa}\n Pagina: {npagina+1}')
         NumeroArchivo+=1
         listaRuc=[]
         return listaRuc
@@ -33,7 +33,7 @@ global NumeroArvhivo
 
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
-nActividad=4
+nActividad=3
 try:
     #este try itera en las actividades 
     while True:
@@ -49,7 +49,7 @@ try:
             #este try itera en las empresas de cada ciiu de cada actidad
             pagigaCIIU=driver.current_url
             #este try intenta iterar en cada ciiu de cada actividad
-            nCIIU=8
+            nCIIU=1
             while True:
                 ########
                 #CODIGO BASURA
@@ -59,9 +59,9 @@ try:
 
                 driver.find_element(By.XPATH,f'//*[@id="categorias"]/div[3]/div[{nCIIU}]/div/a').click()
                 nCIIU+=1
-                nEmpresa=22
+                nEmpresa=1
                 try:
-                    npagina=26#inicio de pagina por default
+                    npagina=2#inicio de pagina por default
                     paginador=driver.current_url#obtiene el url de de la pagina donde se encuentran listadas las empresas
                     condicion=True
                     while condicion:
@@ -69,21 +69,12 @@ try:
                             empresa=driver.find_element(By.XPATH, f'//*[@id="categorias"]/div[3]/div[{nEmpresa}]/div/a').text
                             # Dividir el string en partes utilizando el texto " (RUC: " como separador
                             partes = empresa.split(" (RUC: ")
-                            # Obtener la razon social
-                            razon_social = partes[0]
+                           
                             # Obtener el RUC y eliminar el ")" al final
                             ruc = partes[1].replace(")", "")
-                            # Verificar si hay nombre comercial presente
-                            if " - " in razon_social:
-                                nombre_comercial = razon_social.split(" - ")[0]
-                                razon_social = razon_social.split(" - ")[1]
-                            else:
-                                nombre_comercial = ""
                             # Crear un diccionario con los datos unificados
                             datos = {
                                 "ruc": ruc,
-                                "razon social": razon_social,
-                                "nombre comercial": nombre_comercial
                                 }
                             listaRuc.append(datos)
                             nEmpresa+=1
@@ -91,6 +82,7 @@ try:
                         except:
                             ulrSiguiente=paginador.replace('.php',f'-pagina-{npagina}.php')
                             driver.get(ulrSiguiente)
+                            print(len(listaRuc))
                             npagina+=1
                             # Verificar si hay empresas en la nueva página
                             empresas_en_pagina = driver.find_elements(By.XPATH, '//*[@id="categorias"]/div[3]/div')
@@ -111,6 +103,8 @@ try:
         except:
             print('esas son todos los ciiu de la actividad\nregresamos a la pagina anterios')
             driver.get('https://www.datosperu.org/')
+            nuevaLista=creaExcel(listaRuc)
+            listaRuc=nuevaLista
 except:
     print('esas son todas las actividades')
 
