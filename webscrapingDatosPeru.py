@@ -15,10 +15,10 @@ options.binary_location = brave_path
 #driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options )
 listaRuc=[]
-NumeroArchivo=3
+NumeroArchivo=1
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
-nActividad=11
+nActividad=1
 try:
     #este try itera en las actividades 
     while True:
@@ -28,13 +28,15 @@ try:
         print(actividad)
         #########
         #click en la primerta nActividad
+        #usamos condicional pra crear excel
+        
         driver.find_element(By.XPATH,f'//*[@id="categorias"]/div[2]/div[{nActividad}]/div/a').click()
         nActividad+=1
         try:
             #este try itera en las empresas de cada ciiu de cada actidad
             pagigaCIIU=driver.current_url
             #este try intenta iterar en cada ciiu de cada actividad
-            nCIIU=7
+            nCIIU=1
             while True:
                 ########
                 #CODIGO BASURA
@@ -72,16 +74,19 @@ try:
                             # Verificar si hay empresas en la nueva página
                             empresas_en_pagina = driver.find_elements(By.XPATH, '//*[@id="categorias"]/div[3]/div')
                             if len(empresas_en_pagina) == 0:
-                                if len(listaRuc) >=10000:    
+                                if len(listaRuc) >=50000:    
                                     #debido a la cantidad demora en convertir a excel
                                     Datosperu=pd.DataFrame(listaRuc)
                                     Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
                                     print(f'Se creo un excel de {len(listaRuc)} filas')
                                     # Abre un archivo en modo de apéndice ('a' para agregar).
                                     # Si el archivo no existe, se creará. Si existe, se escribirá al final.
-                                    with open('punto de partida.txt', 'w') as archivo:
+                                    with open(f'punto de partida-rucDatosPeru{NumeroArchivo}.txt', 'w') as archivo:
                                         # Escribe líneas en el archivo usando el método write().
-                                        archivo.write(f'la secuencia debe seguien el:\n actividad: {nActividad}\nCIIU:{nCIIU}\nPagina: {npagina}')
+                                        fin=time.time()
+                                        archivo.write(f'tiempo de ejecucion:  {fin-inicio} segundos')
+                                        archivo.write(f'Se creo un excel de {len(listaRuc)} filas')
+                                        archivo.write(f'la secuencia debe seguien el:\n Actividad: {nActividad}')
                                         # El archivo se cierra automáticamente después del bloque "with".
                                         print("Contenido agregado al archivo.")
                                     NumeroArchivo+=1
