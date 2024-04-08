@@ -15,10 +15,10 @@ options.binary_location = brave_path
 #driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options )
 listaRuc=[]
-NumeroArchivo=1
+NumeroArchivo=2
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
-nActividad=1
+nActividad=25
 try:
     #este try itera en las actividades 
     while True:
@@ -74,7 +74,7 @@ try:
                             # Verificar si hay empresas en la nueva página
                             empresas_en_pagina = driver.find_elements(By.XPATH, '//*[@id="categorias"]/div[3]/div')
                             if len(empresas_en_pagina) == 0:
-                                if len(listaRuc) >=50000:    
+                                if len(listaRuc) >=30000:    
                                     #debido a la cantidad demora en convertir a excel
                                     Datosperu=pd.DataFrame(listaRuc)
                                     Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
@@ -84,8 +84,9 @@ try:
                                     with open(f'punto de partida-rucDatosPeru{NumeroArchivo}.txt', 'w') as archivo:
                                         # Escribe líneas en el archivo usando el método write().
                                         fin=time.time()
-                                        archivo.write(f'tiempo de ejecucion:  {fin-inicio} segundos')
-                                        archivo.write(f'Se creo un excel de {len(listaRuc)} filas')
+                                        archivo.write(f'tiempo de ejecucion:  {fin-inicio} segundos\n')
+                                        inicio=time.time()
+                                        archivo.write(f'Se creo un excel de {len(listaRuc)} filas\n')
                                         archivo.write(f'la secuencia debe seguien el:\n Actividad: {nActividad}')
                                         # El archivo se cierra automáticamente después del bloque "with".
                                         print("Contenido agregado al archivo.")
