@@ -15,10 +15,11 @@ options.binary_location = brave_path
 #driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options )
 listaRuc=[]
-NumeroArchivo=13
+NumeroArchivo=int(input('ingrese numeracion de archivo: '))
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
-nActividad=25
+print('esta informacion la puedes en punto de partida')
+nActividad=int(input('ingrese numero de actividad: '))
 try:
     #este try itera en las actividades 
     while True:
