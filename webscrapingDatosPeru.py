@@ -15,7 +15,7 @@ options.binary_location = brave_path
 #driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options )
 listaRuc=[]
-NumeroArchivo=2
+NumeroArchivo=13
 driver.get('https://www.datosperu.org/')
 driver.maximize_window()
 nActividad=25
