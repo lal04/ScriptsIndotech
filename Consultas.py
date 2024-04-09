@@ -130,7 +130,10 @@ def consultar_sale(ruc):
             verifi = soup.find(id="CF00Nw00000097xcg_ilecell")
             if verifi == None:
                 data_saleForce={
-                    'Nodo':'Error'            
+                    'Nodo':'Error',
+                    'Sub segmento global':'',
+                    'Sub segmento local':'',
+                    'contacto': '',            
                 }
                 return data_saleForce
             else:
