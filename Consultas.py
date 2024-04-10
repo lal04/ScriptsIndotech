@@ -2,6 +2,8 @@ import time
 import datetime
 import pandas as pd
 import sys
+import os
+import shutil
 import requests
 from bs4 import BeautifulSoup as sp
 from concurrent.futures import ThreadPoolExecutor
@@ -21,8 +23,6 @@ data={
 cliente.post('https://telefonicab2b.my.site.com/fvi/login', data=data)
 #tiempo de respuesta del servidor y tiempo de lectura
 timeout=(400,1200)
-#numero de hilos de ejecucion
-hilos=11
 tiempo_nuevo_intento=2
 # Lista de tokens
 tokens = [
@@ -175,7 +175,7 @@ def next_token():
     return tokens[next_index]
 # Inicializa el token actual
 current_token = tokens[0]
-#nombreArchivo='Prueba'
+print('poner nombre excacto, para podre mover los archivos')
 nombreArchivo=input("ingrese el nombre del archivo: ")
 print('Maximo:15\nMinimo:4')
 hilos=int(input('ingrese el numero de hilos: '))
@@ -204,5 +204,21 @@ orden_columnas = [
 df_final = pd.json_normalize(lista_json)
 df_final_ordenado = df_final[orden_columnas]
 df_final_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
+try:
+    ###mover archivos creados
+    # Obtener la ruta actual de la carpeta
+    ruta_actual = os.path.abspath(f"{nombreArchivo}SF.xlsx")
+    # Carpeta de destino
+    ruta_destino=ruta_actual.replace(f'3.Bloques\\{nombreArchivo}SF.xlsx', f'4.Filtrados\\{nombreArchivo}SF.xlsx')
+    #mover archivo
+    shutil.move(ruta_actual, ruta_destino)
+    ###mover archivo base a completados
+    # Carpeta de destino
+    completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completado\\{nombreArchivo}.xlsx')
+    #mover archivo
+    shutil.move(f'{nombreArchivo}.xlsx',completado)
+    print('Archivos movidos correctamente!!')
+except:
+    print('Ocurrio un error!! no se movieron los archivos')
 fin = time.time()
 print("Tiempo de ejecución:", fin - inicio)
