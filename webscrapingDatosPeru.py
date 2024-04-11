@@ -20,6 +20,10 @@ driver.get('https://www.datosperu.org/')
 driver.maximize_window()
 print('esta informacion la puedes en punto de partida')
 nActividad=int(input('ingrese numero de actividad: '))
+print('numero ingresado, sera el minimo de filas para convertir en excel')
+condicion=input('ingrese numero minimo de filas: ')
+
+
 try:
     #este try itera en las actividades 
     while True:
@@ -75,7 +79,13 @@ try:
                             # Verificar si hay empresas en la nueva página
                             empresas_en_pagina = driver.find_elements(By.XPATH, '//*[@id="categorias"]/div[3]/div')
                             if len(empresas_en_pagina) == 0:
-                                if len(listaRuc) >=30000:    
+                                
+                                if condicion=='':
+                                    condicion=300
+                                else:
+                                    condicion=int(condicion)
+                                    
+                                if len(listaRuc) >=condicion:    
                                     #debido a la cantidad demora en convertir a excel
                                     Datosperu=pd.DataFrame(listaRuc)
                                     Datosperu.to_excel(f'rucDatosPeru{NumeroArchivo}.xlsx', index=False)
