@@ -22,6 +22,10 @@ print('esta informacion la puedes en punto de partida')
 nActividad=int(input('ingrese numero de actividad: '))
 print('numero ingresado, sera el minimo de filas para convertir en excel')
 condicion=input('ingrese numero minimo de filas: ')
+if condicion=='':
+    condicion=30000
+else:
+    condicion=int(condicion)
 
 
 try:
@@ -80,10 +84,6 @@ try:
                             empresas_en_pagina = driver.find_elements(By.XPATH, '//*[@id="categorias"]/div[3]/div')
                             if len(empresas_en_pagina) == 0:
                                 
-                                if condicion=='':
-                                    condicion=300
-                                else:
-                                    condicion=int(condicion)
                                     
                                 if len(listaRuc) >=condicion:    
                                     #debido a la cantidad demora en convertir a excel
