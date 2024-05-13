@@ -39,6 +39,9 @@ def main():
     # Crear la ruta de la siguiente carpeta para el proceso
     ruta_creacion = ruta_actual.replace("1.BDBruto", "2.BDNeto\\")
     
+    # Solicitar al usuario el nombre con el que de identificara la base 
+    nombreArchivo = input('Ingrese la nomenclatura para el archivo: ')
+    
     # Guardar solo la columna 'ruc' en un nuevo archivo Excel y moverlo a la siguiente carpeta
     df_sin_duplicados.to_excel(f'{ruta_creacion}{nombreArchivo}.xlsx', index=False)
     print("Se creó el archivo en la carpeta siguiente, con el mismo nombre")
