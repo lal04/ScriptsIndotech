@@ -1,43 +1,28 @@
-
 import os
 import pandas as pd
+
 # Lee el archivo Excel completo
-archivo_base = input('Ingrese el nombre del archivo (sin extensión): ')  # Nombre base del archivo
+archivo_base = input('Ingrese el nombre del archivo (sin extension): ')  # Nombre base del archivo
 archivo_excel = f"{archivo_base}.xlsx"  # Nombre del archivo con extensión
-print('si no ingresas valor, se crearan bloques de 500')
-filas=input('ingrese numero de filas de cada bloque: ')
-if filas == '':
-    filas=500
-else:
-    filas=int(filas)
 
-df_original = pd.read_excel(archivo_excel)
+# Solicitar al usuario el número de filas por bloque
+filas = int(input('Ingrese el número de filas de cada bloque (500 por defecto): ') or '500')
 
-# Obtener el encabezado
+# Mover el archivo Excel a la carpeta "completados"
+os.makedirs('completados', exist_ok=True)
+os.rename(archivo_excel, f'completados/{archivo_excel}')
+
+# Leer el archivo Excel completo
+df_original = pd.read_excel(f'completados/{archivo_excel}')
+
+# Dividir el DataFrame en bloques y guardar en archivos individuales
+ruta = os.path.abspath(archivo_excel).replace(f'2.BDNeto\\{archivo_excel}', '3.Bloque')
 encabezado = list(df_original.columns)
 
-# Dividir en bloques de 500 filas
-bloques = [df_original[i:i+filas] for i in range(0, len(df_original), filas)]
- # Obtener la ruta actual de la carpeta
-ruta = os.path.abspath(f"{archivo_excel}")
-# Reemplaza las barras invertidas con barras normales
-ruta=ruta.replace(f'2.BDNeto\\{archivo_excel}', '3.Bloque')
+for i, bloque in enumerate([df_original[i:i+filas] for i in range(0, len(df_original), filas)]):
+    bloque.columns = encabezado
+    bloque.to_excel(f'{ruta}\\{archivo_base}B{(i+1):04d}.xlsx', index=False)
+    print(f"Guardado {archivo_base}B{(i+1):04d}.xlsx con {len(bloque)} filas.")
 
-print(ruta)
-
-carpeta_bloques=ruta  # Carpeta donde se guardarán los bloques
-# Iterar sobre los bloques y guardar en nuevos archivos
-for i, bloque in enumerate(bloques):
-    Cifra=str(i+1).zfill(4)
-    nomenclatura= f"B{Cifra}.xlsx"  # Nombre del archivo con el número de bloque
-
-    bloque.columns = encabezado  # Asignar el mismo encabezado que el original
-
-    nombre_archivo = f'{carpeta_bloques}\\{archivo_base}{nomenclatura}'    
-    bloque.to_excel(nombre_archivo, index=False)  # Guardar el bloque en un archivo Excel
-
-    print(f"Guardado  {archivo_base+nomenclatura} con {len(bloque)} filas.")
-    
-
-input('presione enter para terminar!')
-
+# Esperar a que el usuario presione enter para terminar
+input('Presione enter para terminar.')
