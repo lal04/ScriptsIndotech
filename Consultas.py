@@ -184,8 +184,10 @@ df = pd.read_excel(f"{nombreArchivo}.xlsx")
 #######
 # Utilizar ThreadPoolExecutor para realizar consultas en paralelo
 with ThreadPoolExecutor(max_workers=hilos) as executor:
+    # Convertir nombres de columnas a minúsculas y seleccionar solo la columna 'ruc'
+    df.columns = map(str.lower, df.columns)  # Convertir nombres de columnas a minúsculas
     #lista_json = df["RUC"].map(lambda ruc: consultar_ruc(ruc, current_token))
-    lista_json = list(executor.map(lambda ruc: consultar_ruc(ruc, current_token), df["RUC"]))
+    lista_json = list(executor.map(lambda ruc: consultar_ruc(ruc, current_token), df["ruc"]))
 #ordenamos las columnas del excel
 orden_columnas = [
     "fecha",
@@ -203,13 +205,17 @@ orden_columnas = [
     "contacto"]
 df_final = pd.json_normalize(lista_json)
 df_final_ordenado = df_final[orden_columnas]
-df_final_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
+
+# Ordenar el DataFrame por la columna 'Nombre' de forma alfabética
+df_ordenado = df_final_ordenado.sort_values(by='departamento')
+
+df_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
 try:
     ###mover archivos creados
     # Obtener la ruta actual de la carpeta
     ruta_actual = os.path.abspath(f"{nombreArchivo}SF.xlsx")
     # Carpeta de destino
-    ruta_destino=ruta_actual.replace(f'3.Bloques\\{nombreArchivo}SF.xlsx', f'4.Filtrados\\{nombreArchivo}SF.xlsx')
+    ruta_destino=ruta_actual.replace(f'3.Bloque\\{nombreArchivo}SF.xlsx', f'4.Filtrado\\{nombreArchivo}SF.xlsx')
     #mover archivo
     shutil.move(ruta_actual, ruta_destino)
     ###mover archivo base a completados
@@ -221,4 +227,4 @@ try:
 except:
     print('Ocurrio un error!! no se movieron los archivos')
 fin = time.time()
-print("Tiempo de ejecución:", fin - inicio)
+print("Tiempo de ejecucion:", fin - inicio)
