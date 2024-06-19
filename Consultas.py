@@ -26,7 +26,11 @@ timeout=(400,1200)
 tiempo_nuevo_intento=2
 # Lista de tokens
 tokens = [
-        
+    "eyJlbWFpbCI6ImFudG9uaW9ydWl6QHlvcG1haWwuY29tIn0.AADEePgISZY5A9WA4WZYtV-7Sy58nsydJGl1s7fR5m0"
+    "eyJlbWFpbCI6ImNlc2FyYW50b25paW9AeW9wbWFpbC5jb20ifQ.WfIw_fFlCnUZMZrkzzkCii94BgALS2KFDsk-l4_t79I"
+    "eyJlbWFpbCI6InF1aXNwZW1hbWFuaUB5b3BtYWlsLmNvbSJ9.jYmF507RGgv1D5spfi8i0_mxfJMyDJ0aZMBglX9UVWE"
+    "eyJlbWFpbCI6ImdlcmFyZG9nYWxpYW5vQHlvcG1haWwuY29tIn0.pUCwheXjwSfJrzIcKmr0dd5PJKSXFxhDKxe2z8LXSzc"
+    "eyJlbWFpbCI6ImFudG9uaW9pbmd1cm9AeW9wbWFpbC5jb20ifQ.Rbvm946ELpcmHO2gzWaTEFoxz8-1dfFBdXiDD2g1M6A"
     "eyJlbWFpbCI6InBlZHJvcmZmZm9xdWUxMkB5b3BtYWlsLmNvbSJ9.PW9G-yPsC3S3EU5WywQp4_FubJedsdyKjx4pJcrnMJA",
     "eyJlbWFpbCI6InBlZHJvcm9xdWUxMjM0QHlvcG1haWwuY29tIn0.Nw6dwjTMhqtFH0hugjAmaLeJ07OtD1FP5ELoMRX6TvI",
     "eyJlbWFpbCI6InphbWJyYW5vaW5kb3JlY2hAeW9wbWFpbC5jb20ifQ.OVXpClsbHTEoqvCBYmr4cJdNmoBJfcVPDAf0j1Rduoo",
@@ -114,7 +118,10 @@ def consultar_sale(ruc):
         table = soup.find('table', class_='list') # Puedes usar find_all si hay más de una tabla con esa clase
         if table == None:
             data_saleForce={
-                    'Nodo':'No encontrado'            
+                    'Nodo':'No encontrado',
+                    'Sub segmento global':'',
+                    'Sub segmento local':'',
+                    'contacto': '',          
                 }
             return data_saleForce
         else:
@@ -220,7 +227,7 @@ try:
     shutil.move(ruta_actual, ruta_destino)
     ###mover archivo base a completados
     # Carpeta de destino
-    completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completado\\{nombreArchivo}.xlsx')
+    completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
     #mover archivo
     shutil.move(f'{nombreArchivo}.xlsx',completado)
     print('Archivos movidos correctamente!!')
@@ -228,3 +235,4 @@ except:
     print('Ocurrio un error!! no se movieron los archivos')
 fin = time.time()
 print("Tiempo de ejecucion:", fin - inicio)
+input("presione enter para terminar")
