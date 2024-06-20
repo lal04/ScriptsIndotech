@@ -9,3 +9,7 @@ Eje*
 tokens.txt
 usuarioBrayan*
 *.ico
+*.spec
+*.xlsx
+dist
+build
