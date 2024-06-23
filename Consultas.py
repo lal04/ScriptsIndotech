@@ -231,3 +231,4 @@ except:
     print('Ocurrio un error!! no se movieron los archivos')
 fin = time.time()
 print("Tiempo de ejecucion:", fin - inicio)
+input("PRESIONE ENTER PARA TERMINAR...")
