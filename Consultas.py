@@ -34,6 +34,7 @@ tokens = [
     "eyJlbWFpbCI6InBlZHJvcmZmZm9xdWUxMkB5b3BtYWlsLmNvbSJ9.PW9G-yPsC3S3EU5WywQp4_FubJedsdyKjx4pJcrnMJA",
     "eyJlbWFpbCI6InBlZHJvcm9xdWUxMjM0QHlvcG1haWwuY29tIn0.Nw6dwjTMhqtFH0hugjAmaLeJ07OtD1FP5ELoMRX6TvI",
     "eyJlbWFpbCI6InphbWJyYW5vaW5kb3JlY2hAeW9wbWFpbC5jb20ifQ.OVXpClsbHTEoqvCBYmr4cJdNmoBJfcVPDAf0j1Rduoo",
+    "eyJlbWFpbCI6InBlZHJvcmZmZm9xdWUxMkB5b3BtYWlsLmNvbSJ9.PW9G-yPsC3S3EU5WywQp4_FubJedsdyKjx4pJcrnMJA",
     "eyJlbWFpbCI6InphbWJyYW5vX3JhdWxAeW9wbWFpbC5jb20ifQ.-VYSTwJA4XZ2ovyXPCHW8jqF3et1yqKmSsXjFKMbf5A",
     "eyJlbWFpbCI6InphbWJyYW5vX2x1aXNAeW9wbWFpbC5jb20ifQ.7S8BO0yldp6VbVJm77pR7TEyejqrM9dwY21XmqEAMaU",
     "eyJlbWFpbCI6ImFudG9uaW9fcGVyZXpAeW9wbWFpbC5jb20ifQ.BZhww4jSqkSVi7VEv-CGC1K0oIdJMzWKHuPfCGMvMNw",
@@ -227,6 +228,7 @@ try:
     shutil.move(ruta_actual, ruta_destino)
     ###mover archivo base a completados
     # Carpeta de destino
+    completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
     completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
     #mover archivo
     shutil.move(f'{nombreArchivo}.xlsx',completado)
