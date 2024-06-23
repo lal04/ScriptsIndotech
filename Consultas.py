@@ -3,10 +3,12 @@ import datetime
 import pandas as pd
 import sys
 import os
+from src.token import Token
 import shutil
 import requests
 from bs4 import BeautifulSoup as sp
 from concurrent.futures import ThreadPoolExecutor
+tk=Token()
 inicio = time.time()
  #creamos el incio de sesion salea force
 cliente=requests.Session()
@@ -25,47 +27,17 @@ cliente.post('https://telefonicab2b.my.site.com/fvi/login', data=data)
 timeout=(400,1200)
 tiempo_nuevo_intento=2
 # Lista de tokens
-tokens = [
-    "eyJlbWFpbCI6ImFudG9uaW9ydWl6QHlvcG1haWwuY29tIn0.AADEePgISZY5A9WA4WZYtV-7Sy58nsydJGl1s7fR5m0"
-    "eyJlbWFpbCI6ImNlc2FyYW50b25paW9AeW9wbWFpbC5jb20ifQ.WfIw_fFlCnUZMZrkzzkCii94BgALS2KFDsk-l4_t79I"
-    "eyJlbWFpbCI6InF1aXNwZW1hbWFuaUB5b3BtYWlsLmNvbSJ9.jYmF507RGgv1D5spfi8i0_mxfJMyDJ0aZMBglX9UVWE"
-    "eyJlbWFpbCI6ImdlcmFyZG9nYWxpYW5vQHlvcG1haWwuY29tIn0.pUCwheXjwSfJrzIcKmr0dd5PJKSXFxhDKxe2z8LXSzc"
-    "eyJlbWFpbCI6ImFudG9uaW9pbmd1cm9AeW9wbWFpbC5jb20ifQ.Rbvm946ELpcmHO2gzWaTEFoxz8-1dfFBdXiDD2g1M6A"
-    "eyJlbWFpbCI6InBlZHJvcmZmZm9xdWUxMkB5b3BtYWlsLmNvbSJ9.PW9G-yPsC3S3EU5WywQp4_FubJedsdyKjx4pJcrnMJA",
-    "eyJlbWFpbCI6InBlZHJvcm9xdWUxMjM0QHlvcG1haWwuY29tIn0.Nw6dwjTMhqtFH0hugjAmaLeJ07OtD1FP5ELoMRX6TvI",
-    "eyJlbWFpbCI6InphbWJyYW5vaW5kb3JlY2hAeW9wbWFpbC5jb20ifQ.OVXpClsbHTEoqvCBYmr4cJdNmoBJfcVPDAf0j1Rduoo",
-    "eyJlbWFpbCI6InBlZHJvcmZmZm9xdWUxMkB5b3BtYWlsLmNvbSJ9.PW9G-yPsC3S3EU5WywQp4_FubJedsdyKjx4pJcrnMJA",
-    "eyJlbWFpbCI6InphbWJyYW5vX3JhdWxAeW9wbWFpbC5jb20ifQ.-VYSTwJA4XZ2ovyXPCHW8jqF3et1yqKmSsXjFKMbf5A",
-    "eyJlbWFpbCI6InphbWJyYW5vX2x1aXNAeW9wbWFpbC5jb20ifQ.7S8BO0yldp6VbVJm77pR7TEyejqrM9dwY21XmqEAMaU",
-    "eyJlbWFpbCI6ImFudG9uaW9fcGVyZXpAeW9wbWFpbC5jb20ifQ.BZhww4jSqkSVi7VEv-CGC1K0oIdJMzWKHuPfCGMvMNw",
-    "eyJlbWFpbCI6ImFudG9uaW9fZ2VuYXJvQHlvcG1haWwuY29tIn0.03-l_Saa19GQxW_m1rk3UaSXzFapQDPxaqAlj3OsiE4",
-    "eyJlbWFpbCI6Im1vdmlzaW5kb3NhY0B5b3BtYWlsLmNvbSJ9.GaJ5gtsiB4EZMRy256fA2y-cOIPQm4bS3sII49hSvdM",
-    "seyJlbWFpbCI6Im1vdmlzaW5kb0B5b3BtYWlsLmNvbSJ9.hZGuXA4OopEcjU7WG4y5UueOg4xUtzqz5EJFEh-YtC0",
-    "eyJlbWFpbCI6InBlcnVodWFuY2FAeW9wbWFpbC5jb20ifQ.Zh33o6cmcMUbEP6J09cXOqRKV9IBD5r7ZqI7NZdv3U0",
-    "eyJlbWFpbCI6InRlY2hodWFuY2FAeW9wbWFpbC5jb20ifQ.h8fbWLXZFChT22pihxPtLk2UAVorZE_e2oAQ8kMfnEU",
-    "eyJlbWFpbCI6InRlY2hodWFuY2F5b0B5b3BtYWlsLmNvbSJ9.cVR4oRYqQ-EafRFzBWypdaqwQbmpRcJwn_TX4XdifTg",
-    "eyJlbWFpbCI6ImluZG9odWFuY2F5b0B5b3BtYWlsLmNvbSJ9.kzMV4bUq84jynZO45VFPjZeFrK9kYYJW3MRQmUtNfz4",
-    "eyJlbWFpbCI6InJhdWx6YW1icmFub2xlb24xNUBnbWFpbC5jb20ifQ.g6gEVC4z1ZkED9Rk6Z1EyYtiSqqBoAGziyUr6JEtJ5Y",
-    "eyJlbWFpbCI6InJhYW1icmFub2wxODg4NUB5b3BtYWlsLmNvbSJ9.fWKi-gBFzGRmD9z205FnFbfEvEaRjpC8WXNf_nUDRZY",
-    "eyJlbWFpbCI6ImluZG9zYWMxOTk5NUB5b3BtYWlsLmNvbSJ9.HtFi0vOxo16FWKnc1teM75iespYQkFvj_z5f7OroGUE",
-    "eyJlbWFpbCI6ImdzamdraGwyNzUydW5vQHlvcG1haWwuY29tIn0.gZ0JplbkRVDM0oipA_T1orACpEP9nqcY4WVChXRWMoo",
-    "eyJlbWFpbCI6ImdzZ2ZzYnhjYjE1NjU2QHlvcG1haWwuY29tIn0.tiYQr6NYoGlPXnhW-SKmo-VF0QX0E1OrKV2IH0_D3QA",
-    "eyJlbWFpbCI6ImdzZ2ZzYnhjYkB5b3BtYWlsLmNvbSJ9.eVnla4m-RLYdWAsNvKUrr4XuzkC7vP1PGujAL2ZlDuY",
-    "eyJlbWFpbCI6Imx1aXNmZW9saXMxNTZnZ2dnQHlvcG1haWwuY29tIn0.yvXWOH2IX9iZczU6Eu8uWQUUjxUr0vmIJvSgmB9G0JQ",
-    "eyJlbWFpbCI6Imx1aXNmZWxpcGVzb2xpczE1NmdnZ2dAeW9wbWFpbC5jb20ifQ.dag7T-qVrkCROSUgroKau0mgHG96Xm9OwMpYyHVfmVo",
-    "eyJlbWFpbCI6Imx1aXNmZWxpcGVzb2xpczE1NkB5b3BtYWlsLmNvbSJ9.J7aThA0-I17zu0XUhGf6r6IxMKc8ajvyJRkBbxKbXko",
-    "eyJlbWFpbCI6Imx1aXNmZWxpcGVzb2xpc0B5b3BtYWlsLmNvbSJ9.IrxVsrGwUqi9cvAC8ctbmn510-tyDb8TsM7DxvYBfiI",
-    "eyJlbWFpbCI6ImluZG9zYWNodWFuY2F5bzE1NkB5b3BtYWlsLmNvbSJ9.uQnLh1N2ZZgKer-alsMikVGAeNZEGrVgdkwdAma3UOQ",
-    "eyJlbWFpbCI6ImluZG9zYWNodWFuY2F5b0B5b3BtYWlsLmNvbSJ9.JmRLSTNnZYjZMG1eeRd_7a0QkcBdRoySBwqpxXYvHtA",
-    "eyJlbWFpbCI6InBlcGl0b2VsdGVsaWJsZTEyM0B5b3BtYWlsLmNvbSJ9.TGpokHZbl1OGy_vkoT_jAUHIfaiCIENSeRcAVEmbzB8",
-    "eyJlbWFpbCI6InBlZHJvcmZmZm9xZTEyQHlvcG1haWwuY29tIn0.liDj7dnMAx66tXG52nClSF0X_jie50f0B3VS1-12neU",
-    "eyJlbWFpbCI6ImdhdG8zMmx1aXNtYW5yaXF1ZTE1M0B5b3BtYWlsLmNvbSJ9.ABwIPRJaCg22NOyVK8v61boNDN-X7eH1sT_2gPObo7o",
-    "eyJlbWFpbCI6ImZyZXVoYXByZWZyYXZ1LTg5MDhAeW9wbWFpbC5jb20ifQ.naemhvjjUl7uKlr9VQISB3TbWL54_8SI7cGTupKIhMM",
-    "eyJlbWFpbCI6InBlcnJpdG9maWp1MTUyMjJAeW9wbWFpbC5jb20ifQ.R2ogdSfsNEED4gOXSvS1sAJPfhKkhrk3VRJhRW3_B1c",
-    "eyJlbWFpbCI6ImdhdG8zMmx1aXNtYW5yaXF1ZUB5b3BtYWlsLmNvbSJ9.NHlyEB_ToEj63JrpBueNC-dAll7h-k6HFVwlfupV-JQ",
-    "eyJlbWFpbCI6InBlcnJpdG9maWp1QHlvcG1haWwuY29tIn0.1klG2kbigPiUZOfygGmKlT67kLUtVHRY4JAzNgEX8EA",
-    "Fin"
-]
+respuesta=input("Tienes tokens para ingresar?(si,no,s,n,)\n>").lower()
+if respuesta in ["si","s"]:
+    
+    for i in range(int(input("Cuantos tokens?\n>"))):
+        tk.agregar_token(input(f"Ingrese el token {i+1}: "))
+tokens = tk.obtener_lista_tokens()
+respuesta=input("Desea ordenasr los tokens?(si,no,s,n,)\nPuede tomar unos minutos!!\n>").lower()
+if respuesta in ["si","s"]:
+    print("Orenando tokens...")
+    tk.ordenar_tokens(tokens)
+
 def consultar_ruc(ruc, token):
     try:
         print(ruc)
@@ -188,7 +160,11 @@ nombreArchivo=input("ingrese el nombre del archivo: ")
 print('Maximo:15\nMinimo:4')
 hilos=int(input('ingrese el numero de hilos: '))
 #analizamos el archivo excel
-df = pd.read_excel(f"{nombreArchivo}.xlsx")
+try:
+    df = pd.read_excel(f"{nombreArchivo}.xlsx")
+except Exception as e:
+    print("No se encontro el archivo!!")
+    print(f"Error:\n\n{e}")
 #######
 # Utilizar ThreadPoolExecutor para realizar consultas en paralelo
 with ThreadPoolExecutor(max_workers=hilos) as executor:

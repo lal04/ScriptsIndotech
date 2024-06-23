@@ -13,3 +13,5 @@ usuarioBrayan*
 *.xlsx
 dist
 build
+.env
+token.txt
