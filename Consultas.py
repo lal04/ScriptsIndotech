@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import sys
 import os
+import re
 from src.token import Token
 import shutil
 import requests
@@ -29,7 +30,7 @@ tiempo_nuevo_intento=2
 # Lista de tokens
 respuesta=input("Tienes tokens para ingresar?(si,no,s,n,)\n>").lower()
 if respuesta in ["si","s"]:
-    
+
     for i in range(int(input("Cuantos tokens?\n>"))):
         tk.agregar_token(input(f"Ingrese el token {i+1}: "))
 tokens = tk.obtener_lista_tokens()
@@ -78,9 +79,9 @@ def consultar_ruc(ruc, token):
         print(f"Error de conexión en consultar_sale: {e}")
         print(f"consulta ruc, esperamos {tiempo_nuevo_intento} segundos...")
         time.sleep(tiempo_nuevo_intento)
-        return consultar_ruc(ruc, token)  # Reintento de la solicitud    
+        return consultar_ruc(ruc, token)  # Reintento de la solicitud
 def consultar_sale(ruc):
-    try: 
+    try:
         #consulta de ruc con sesion iniciada
         url2=f'https://telefonicab2b.my.site.com/fvi/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=001&sen=003&sen=005&sen=500&sen=006&str={ruc}'
         response=cliente.get(url2, timeout=timeout)
@@ -94,7 +95,7 @@ def consultar_sale(ruc):
                     'Nodo':'No encontrado',
                     'Sub segmento global':'',
                     'Sub segmento local':'',
-                    'contacto': '',          
+                    'contacto': '',
                 }
             return data_saleForce
         else:
@@ -113,16 +114,16 @@ def consultar_sale(ruc):
                     'Nodo':'Error',
                     'Sub segmento global':'',
                     'Sub segmento local':'',
-                    'contacto': '',            
+                    'contacto': '',
                 }
                 return data_saleForce
             else:
-                nodo = soup.find(id="CF00Nw00000097xcg_ilecell").text     
+                nodo = soup.find(id="CF00Nw00000097xcg_ilecell").text
                 sub_seg_global=soup.find(id="00Nw0000008XxJ2_ileinner").text
                 sub_seg_local=soup.find(id="00Nw0000008XxJ1_ileinner").text
                 filas=soup.find('table', class_='list').find_all('tr')
                 datos_tabla=[]
-        
+
                 for fila in filas:
                     # Encontrar todas las celdas de la fila
                     celdas = fila.find_all(['td', 'th'])
@@ -131,7 +132,7 @@ def consultar_sale(ruc):
                     datos_tabla.append(datos_fila)
                     # Eliminar la primera fila
                     sinEncabezado = datos_tabla[1:]
-                
+
                 data_saleForce={
                     'Nodo':nodo,
                     'Sub segmento global':sub_seg_global,
@@ -155,62 +156,97 @@ def next_token():
     return tokens[next_index]
 # Inicializa el token actual
 current_token = tokens[0]
-print('poner nombre excacto, para podre mover los archivos')
-nombreArchivo=input("ingrese el nombre del archivo: ")
-print('Maximo:15\nMinimo:4')
-hilos=int(input('ingrese el numero de hilos: '))
-#analizamos el archivo excel
-try:
-    df = pd.read_excel(f"{nombreArchivo}.xlsx")
-except Exception as e:
-    print("No se encontro el archivo!!")
-    print(f"Error:\n\n{e}")
-#######
-# Utilizar ThreadPoolExecutor para realizar consultas en paralelo
-with ThreadPoolExecutor(max_workers=hilos) as executor:
-    # Convertir nombres de columnas a minúsculas y seleccionar solo la columna 'ruc'
-    df.columns = map(str.lower, df.columns)  # Convertir nombres de columnas a minúsculas
-    #lista_json = df["RUC"].map(lambda ruc: consultar_ruc(ruc, current_token))
-    lista_json = list(executor.map(lambda ruc: consultar_ruc(ruc, current_token), df["ruc"]))
-#ordenamos las columnas del excel
-orden_columnas = [
-    "fecha",
-    "ruc",
-    "razonSocial",
-    "estado",
-    "condicion",
-    "direccion",
-    "departamento",
-    "provincia",
-    "distrito",
-    "Nodo",
-    "Sub segmento global",
-    "Sub segmento local",
-    "contacto"]
-df_final = pd.json_normalize(lista_json)
-df_final_ordenado = df_final[orden_columnas]
 
-# Ordenar el DataFrame por la columna 'Nombre' de forma alfabética
-df_ordenado = df_final_ordenado.sort_values(by='departamento')
+# print('Maximo:15\nMinimo:4')
+# hilos=int(input('ingrese el numero de hilos: '))
+hilos=10
 
-df_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
-try:
-    ###mover archivos creados
-    # Obtener la ruta actual de la carpeta
-    ruta_actual = os.path.abspath(f"{nombreArchivo}SF.xlsx")
-    # Carpeta de destino
-    ruta_destino=ruta_actual.replace(f'3.Bloque\\{nombreArchivo}SF.xlsx', f'4.Filtrado\\{nombreArchivo}SF.xlsx')
-    #mover archivo
-    shutil.move(ruta_actual, ruta_destino)
-    ###mover archivo base a completados
-    # Carpeta de destino
-    completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
-    completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
-    #mover archivo
-    shutil.move(f'{nombreArchivo}.xlsx',completado)
-    print('Archivos movidos correctamente!!')
-except:
-    print('Ocurrio un error!! no se movieron los archivos')
+
+
+
+
+def varios(nombreArchivo):
+    #analizamos el archivo excel
+    try:
+        df = pd.read_excel(f"{nombreArchivo}.xlsx")
+    except Exception as e:
+        print("No se encontro el archivo!!")
+        print(f"Error:\n\n{e}")
+
+    #######
+    # Utilizar ThreadPoolExecutor para realizar consultas en paralelo
+    with ThreadPoolExecutor(max_workers=hilos) as executor:
+        # Convertir nombres de columnas a minúsculas y seleccionar solo la columna 'ruc'
+        df.columns = map(str.lower, df.columns)  # Convertir nombres de columnas a minúsculas
+        #lista_json = df["RUC"].map(lambda ruc: consultar_ruc(ruc, current_token))
+        lista_json = list(executor.map(lambda ruc: consultar_ruc(ruc, current_token), df["ruc"]))
+    #ordenamos las columnas del excel
+    orden_columnas = [
+        "fecha",
+        "ruc",
+        "razonSocial",
+        "estado",
+        "condicion",
+        "direccion",
+        "departamento",
+        "provincia",
+        "distrito",
+        "Nodo",
+        "Sub segmento global",
+        "Sub segmento local",
+        "contacto"]
+    df_final = pd.json_normalize(lista_json)
+    df_final_ordenado = df_final[orden_columnas]
+
+    # Ordenar el DataFrame por la columna 'Nombre' de forma alfabética
+    df_ordenado = df_final_ordenado.sort_values(by='departamento')
+
+    df_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
+    try:
+        ###mover archivos creados
+        # Obtener la ruta actual de la carpeta
+        ruta_actual = os.path.abspath(f"{nombreArchivo}SF.xlsx")
+        # Carpeta de destino
+        ruta_destino=ruta_actual.replace(f'3.Bloque\\{nombreArchivo}SF.xlsx', f'4.Filtrado\\{nombreArchivo}SF.xlsx')
+        #mover archivo
+        shutil.move(ruta_actual, ruta_destino)
+        ###mover archivo base a completados
+        # Carpeta de destino
+        completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
+        completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
+        #mover archivo
+        shutil.move(f'{nombreArchivo}.xlsx',completado)
+        print('Archivos movidos correctamente!!')
+    except:
+        print('Ocurrio un error!! no se movieron los archivos')
+
+def encontrar_archivos_excel():
+    # Definir el patrón de búsqueda usando expresiones regulares
+    patron = re.compile(r'^BD\d{8}B\d{4}\.xlsx$')
+
+    # Listar todos los archivos en el directorio especificado
+    todos_los_archivos = os.listdir()
+
+    # Filtrar los archivos que coinciden con el patrón
+    archivos_coincidentes = [archivo for archivo in todos_los_archivos if patron.match(archivo)]
+
+    return archivos_coincidentes
+print('consultara solo un archivo? (si, no)')
+numero_de_consultas=input('> ')
+if numero_de_consultas.lower() in ['s', 'si']:
+
+    print('poner nombre excacto, para podre mover los archivos')
+    nombreArchivo=input("ingrese el nombre del archivo: ")
+    varios(nombreArchivo)
+else: 
+    print('se consultaran todos los archivos con la siguiente nomenclatura: \n BDxxxxxxxxBxxxx ')
+
+    archivos_a_iterar=encontrar_archivos_excel()
+    for archivo in archivos_a_iterar:
+        varios( archivo.replace(".xlsx", ""))
+        print(f"se termnino la ejecucion del archivo {archivo}")
+
+
 fin = time.time()
 print("Tiempo de ejecucion:", fin - inicio)
 input("presione enter para terminar")
