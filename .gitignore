@@ -15,3 +15,5 @@ dist
 build
 .env
 token.txt
+operador*
+src/__pycache__*
