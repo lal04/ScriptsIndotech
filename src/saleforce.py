@@ -44,8 +44,6 @@ class Saleforce:
                 for campo in campos:
                     data_saleForce[campo]=""
                     
-               
-                print(data_saleForce)
                 return data_saleForce
             else:
                 # Usar el método find_all de BeautifulSoup para seleccionar todos los elementos a que tienen el atributo href dentro de la tabla
@@ -65,7 +63,6 @@ class Saleforce:
                         else:
                             data_saleForce[campo]=""
                             
-                    print(data_saleForce)
                     return data_saleForce
                 else:
                     for campo in campos:
@@ -94,8 +91,6 @@ class Saleforce:
                                 sinEncabezado = datos_tabla[1:]
                                 data_saleForce[campo]=sinEncabezado
 
-                    
-                    print(data_saleForce)
                 return data_saleForce
         except requests.exceptions.ConnectionError as e:
             print(f"Error de conexión en consultar_sale: {e}")

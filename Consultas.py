@@ -5,25 +5,16 @@ import sys
 import os
 import re
 from src.token import Token
+from src.saleforce import Saleforce
 import shutil
 import requests
-from bs4 import BeautifulSoup as sp
 from concurrent.futures import ThreadPoolExecutor
 tk=Token()
-inicio = time.time()
  #creamos el incio de sesion salea force
-cliente=requests.Session()
-#datos para el inico de sesion sale force
-data={
-    'username': 'briam.acuna@indotechsac.com.fvi',
-    'Fingerprint': '%7B%22platform%22:%22Win32%22,%22window%22:%22728x1366%22,%22screen%22:%22768x1366%22,%22color%22:%2224-24%22,%22timezoneOffset%22:%22300%22,%22canvas%22:%221099983893%22,%22sessionStorage%22:%22true%22,%22LocalStorage%22:%22true%22,%22indexDB%22:%22true%22,%22webSockets%22:%22true%22,%22plugins%22:%22PDF%20Viewer:Portable%20Document%20Format%5CnChrome%20PDF%20Viewer:Portable%20Document%20Format%5CnChromium%20PDF%20Viewer:Portable%20Document%20Format%5CnMicrosoft%20Edge%20PDF%20Viewer:Portable%20Document%20Format%5CnWebKit%20built-in%20PDF:Portable%20Document%20Format%5Cn%22,%22drm%22:1,%22languages%22:%5B%22es-419%22,%22es%22,%22es-ES%22,%22en%22,%22en-GB%22,%22en-US%22%5D,%22fonts%22:%22%22,%22codecs%22:%22goEIqgoIQqoCqH4=%22,%22mediaDevices%22:%22audioinput::%5Cnvideoinput::%5Cnaudiooutput::%5Cn%22%7D',
-    'ExtraLog': '%5B%7B%22width%22:1366%7D,%7B%22height%22:768%7D,%7B%22language%22:%22es-419%22%7D,%7B%22offset%22:5%7D,%7B%22scripts%22:%5B%7B%22size%22:249,%22summary%22:%22if%20(self%20==%20top)%20%7Bdocument.documentElement.style.v%22%7D,%7B%22size%22:586,%22summary%22:%22var%20SFDCSessionVars=%7B%5C%22server%5C%22:%5C%22https:%5C%5C/%5C%5C/login.sal%22%7D,%7B%22url%22:%22https://telefonicab2b.my.site.com/fvi/jslibrary/SfdcSessionBase208.js%22%7D,%7B%22url%22:%22https://telefonicab2b.my.site.com/fvi/jslibrary/LoginHint208.js%22%7D,%7B%22size%22:26,%22summary%22:%22LoginHint.hideLoginForm();%22%7D,%7B%22size%22:36,%22summary%22:%22LoginHint.getSavedIdentities(false);%22%7D,%7B%22url%22:%22https://telefonicab2b.my.site.com/fvi/jslibrary/baselogin.js%22%7D,%7B%22url%22:%22https://telefonicab2b.my.site.com/marketing/survey/survey1/1386%22%7D,%7B%22url%22:%22https://telefonicab2b.my.site.com/marketing/survey/survey4/1386%22%7D,%7B%22size%22:356,%22summary%22:%22function%20handleLogin()%7Bdocument.login.un.value=doc%22%7D%5D%7D,%7B%22scriptCount%22:10%7D,%7B%22iframes%22:%5B%22https://login.salesforce.com/login/sessionserver212.html%22%5D%7D,%7B%22iframeCount%22:1%7D,%7B%22referrer%22:%22NO_REFERRER%22%7D%5D',
-    'pw': 'Lmeeaqenicld0@S',
-    'un': 'briam.acuna@indotechsac.com.fvi',
-    'pqs': '?startURL=%2Ffvi%2Fhome%2Fhome.jsp&ec=302&inst=5I'
-}
-#login
-cliente.post('https://telefonicab2b.my.site.com/fvi/login', data=data)
+sf=Saleforce()
+sf.inicio_sesion()
+
+inicio = time.time()
 #tiempo de respuesta del servidor y tiempo de lectura
 timeout=(400,1200)
 tiempo_nuevo_intento=2
@@ -34,7 +25,7 @@ if respuesta in ["si","s"]:
     for i in range(int(input("Cuantos tokens?\n>"))):
         tk.agregar_token(input(f"Ingrese el token {i+1}: "))
 tokens = tk.obtener_lista_tokens()
-respuesta=input("Desea ordenasr los tokens?(si,no,s,n,)\nPuede tomar unos minutos!!\n>").lower()
+respuesta=input("Desea ordenar los tokens?(si,no,s,n,)\nPuede tomar unos minutos!!\n>").lower()
 if respuesta in ["si","s"]:
     print("Orenando tokens...")
     tk.ordenar_tokens(tokens)
@@ -44,7 +35,8 @@ def consultar_ruc(ruc, token):
         print(ruc)
         url = f"https://dniruc.apisperu.com/api/v1/ruc/{ruc}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{token}"
         response = requests.get(url,timeout=timeout)
-        saleforce=consultar_sale(ruc)
+        campos_a_consultar=["Nodo", "Sub segmento global", "Sub segmento local", "contacto"]
+        saleforce=sf.consultar_sale(ruc,campos_a_consultar )
         if response.status_code == 200:
             data = response.json()
             success_value = data.get("success", 'FALSO')
@@ -80,71 +72,6 @@ def consultar_ruc(ruc, token):
         print(f"consulta ruc, esperamos {tiempo_nuevo_intento} segundos...")
         time.sleep(tiempo_nuevo_intento)
         return consultar_ruc(ruc, token)  # Reintento de la solicitud
-def consultar_sale(ruc):
-    try:
-        #consulta de ruc con sesion iniciada
-        url2=f'https://telefonicab2b.my.site.com/fvi/_ui/search/ui/UnifiedSearchResults?searchType=2&sen=001&sen=003&sen=005&sen=500&sen=006&str={ruc}'
-        response=cliente.get(url2, timeout=timeout)
-        html=response.text
-        # Crear un objeto BeautifulSoup
-        soup = sp(html, 'html.parser')
-        # Usar el método find o find_all de BeautifulSoup para seleccionar la tabla con la clase list
-        table = soup.find('table', class_='list') # Puedes usar find_all si hay más de una tabla con esa clase
-        if table == None:
-            data_saleForce={
-                    'Nodo':'No encontrado',
-                    'Sub segmento global':'',
-                    'Sub segmento local':'',
-                    'contacto': '',
-                }
-            return data_saleForce
-        else:
-            # Usar el método find_all de BeautifulSoup para seleccionar todos los elementos a que tienen el atributo href dentro de la tabla
-            links = table.find_all('a', href=True)
-            consulta=links[-3].get('href')
-            #entremos a la informacion del ruc encontrado
-            response=cliente.get(f'https://telefonicab2b.my.site.com{consulta}')
-            html=response.text
-            # Crear un objeto BeautifulSoup
-            soup = sp(html, 'html.parser')
-            # verificamos que sea un cliente o que el id de la eqiqueta exista
-            verifi = soup.find(id="CF00Nw00000097xcg_ilecell")
-            if verifi == None:
-                data_saleForce={
-                    'Nodo':'Error',
-                    'Sub segmento global':'',
-                    'Sub segmento local':'',
-                    'contacto': '',
-                }
-                return data_saleForce
-            else:
-                nodo = soup.find(id="CF00Nw00000097xcg_ilecell").text
-                sub_seg_global=soup.find(id="00Nw0000008XxJ2_ileinner").text
-                sub_seg_local=soup.find(id="00Nw0000008XxJ1_ileinner").text
-                filas=soup.find('table', class_='list').find_all('tr')
-                datos_tabla=[]
-
-                for fila in filas:
-                    # Encontrar todas las celdas de la fila
-                    celdas = fila.find_all(['td', 'th'])
-                    # Extraer el texto de cada celda y añadirlo a la lista de datos
-                    datos_fila = [celda.get_text(strip=True) for celda in celdas]
-                    datos_tabla.append(datos_fila)
-                    # Eliminar la primera fila
-                    sinEncabezado = datos_tabla[1:]
-
-                data_saleForce={
-                    'Nodo':nodo,
-                    'Sub segmento global':sub_seg_global,
-                    'Sub segmento local':sub_seg_local,
-                    'contacto': sinEncabezado
-                }
-            return data_saleForce
-    except requests.exceptions.ConnectionError as e:
-        print(f"Error de conexión en consultar_sale: {e}")
-        print(f"consulta sale, esperamos {tiempo_nuevo_intento} segundos...")
-        time.sleep(tiempo_nuevo_intento)
-        return consultar_sale(ruc)  # Reintento de la solicitud
 def next_token():
     # Retorna el siguiente token en la lista circular
     global current_token
@@ -169,6 +96,7 @@ def varios(nombreArchivo):
     #analizamos el archivo excel
     try:
         df = pd.read_excel(f"{nombreArchivo}.xlsx")
+        numero_filas_inicial=df.shape[0]
     except Exception as e:
         print("No se encontro el archivo!!")
         print(f"Error:\n\n{e}")
@@ -195,13 +123,21 @@ def varios(nombreArchivo):
         "Sub segmento global",
         "Sub segmento local",
         "contacto"]
+    
     df_final = pd.json_normalize(lista_json)
     df_final_ordenado = df_final[orden_columnas]
 
     # Ordenar el DataFrame por la columna 'Nombre' de forma alfabética
     df_ordenado = df_final_ordenado.sort_values(by='departamento')
-
-    df_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
+    #verificar que haya 500 filas
+    numero_filas_final=df_ordenado.shape[0]
+    if numero_filas_inicial == numero_filas_final:
+        print(f"se consultaron {numero_filas_final} de {numero_filas_inicial}")
+        df_ordenado.to_excel(f"{nombreArchivo}SF.xlsx", index=False)
+    else: 
+        with open('consultar_nuevamente.txt', 'w') as archivo:
+            archivo.write(nombreArchivo +'\n')
+            archivo.close()
     try:
         ###mover archivos creados
         # Obtener la ruta actual de la carpeta
@@ -212,7 +148,6 @@ def varios(nombreArchivo):
         shutil.move(ruta_actual, ruta_destino)
         ###mover archivo base a completados
         # Carpeta de destino
-        completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
         completado=ruta_actual.replace(f'{nombreArchivo}SF.xlsx', f'completados\\{nombreArchivo}.xlsx')
         #mover archivo
         shutil.move(f'{nombreArchivo}.xlsx',completado)
@@ -235,7 +170,7 @@ print('consultara solo un archivo? (si, no)')
 numero_de_consultas=input('> ')
 if numero_de_consultas.lower() in ['s', 'si']:
 
-    print('poner nombre excacto, para podre mover los archivos')
+    print('ingresar nombre excacto, para podre mover los archivos')
     nombreArchivo=input("ingrese el nombre del archivo: ")
     varios(nombreArchivo)
 else: 

@@ -66,8 +66,11 @@ class Token:
         Retorna True si la consulta es exitosa (código de estado 200), False si no es exitosa (código de estado 401).
         """
         url = f"https://dniruc.apisperu.com/api/v1/ruc/20131312955?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{token}"
-        r = requests.get(url).status_code
-        
+        try:
+            r = requests.get(url).status_code
+        except Exception as e:
+            r = requests.get(url).status_code
+            print(e)
         if r == 200:
             return True
         elif r == 401:
@@ -82,12 +85,16 @@ class Token:
         Los tokens verificados con éxito (True) se colocan al inicio de la lista ordenada.
         """
         lista_ordenada = []
+        tk_activos=0
+        tk_no_activos=0
         
         for token in lista:
             if self.verificar_consultas_de_token(token):
                 lista_ordenada.insert(0, token)
+                tk_activos+=1
             else:
                 lista_ordenada.append(token)
+                tk_no_activos+=1
         
         with open("token.txt", "w") as tk:
             for token in lista_ordenada:
@@ -95,6 +102,7 @@ class Token:
                 tk.write(f"{token_encriptado}\n")
         
         print("Tokens ordenados y actualizados en token.txt")
+        print(f"tokens activos: {tk_activos}\n tokens no activos: {tk_no_activos}")
 
 
 
