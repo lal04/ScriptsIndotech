@@ -2,6 +2,7 @@ from cryptography.fernet import Fernet
 import os
 from dotenv import load_dotenv
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 class Token:
     def __init__(self) -> None:
@@ -67,17 +68,17 @@ class Token:
         """
         url = f"https://dniruc.apisperu.com/api/v1/ruc/20131312955?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{token}"
         try:
-            r = requests.get(url).status_code
+            r = requests.get(url)
+            if r.status_code == 200:
+                return True
+            elif r.status_code == 401:
+                return False
+            else:
+                print("Error al consultar la API")
+                return False
         except Exception as e:
-            r = requests.get(url).status_code
-            print(e)
-        if r == 200:
-            return True
-        elif r == 401:
+            print(f"Error al verificar el token {token}: {e}")
             return False
-        else:
-            print("Error al consultar la API")
-            return False  # Mejorar manejo de errores, retornando False en caso de error
 
     def ordenar_tokens(self, lista: list) -> None:
         """
@@ -85,25 +86,33 @@ class Token:
         Los tokens verificados con éxito (True) se colocan al inicio de la lista ordenada.
         """
         lista_ordenada = []
-        tk_activos=0
-        tk_no_activos=0
-        
-        for token in lista:
+        tk_activos = 0
+        tk_no_activos = 0
+
+        def verificar_y_ordenar(token):
             if self.verificar_consultas_de_token(token):
-                lista_ordenada.insert(0, token)
-                tk_activos+=1
+                return (True, token)
             else:
-                lista_ordenada.append(token)
-                tk_no_activos+=1
-        
+                return (False, token)
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_token = {executor.submit(verificar_y_ordenar, token): token for token in lista}
+            for future in as_completed(future_to_token):
+                success, token = future.result()
+                if success:
+                    lista_ordenada.insert(0, token)
+                    tk_activos += 1
+                else:
+                    lista_ordenada.append(token)
+                    tk_no_activos += 1
+
         with open("token.txt", "w") as tk:
             for token in lista_ordenada:
                 token_encriptado = self.encriptador.encrypt(token.encode()).decode()
                 tk.write(f"{token_encriptado}\n")
-        
+
         print("Tokens ordenados y actualizados en token.txt")
         print(f"tokens activos: {tk_activos}\n tokens no activos: {tk_no_activos}")
-
 
 
                 
