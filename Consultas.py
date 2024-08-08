@@ -6,6 +6,7 @@ import os
 import re
 from src.token import Token
 from src.saleforce import Saleforce
+from src.ositel import Ositel
 import shutil
 import requests
 from concurrent.futures import ThreadPoolExecutor
@@ -49,6 +50,8 @@ def consultar_ruc(ruc, token):
                     "fecha": datetime.datetime.now().strftime("%d/%m/%Y")
                 }
                 data_con_fecha.update(data_filtrado)
+                
+                data_con_fecha["ositel"]=Ositel().consulta_ostitel(ruc)
                 return data_con_fecha
             else:
                 # Si "success" es Falso, devuelve un diccionario personalizado
@@ -58,6 +61,7 @@ def consultar_ruc(ruc, token):
                     "estado": "No activo",
                 }
                 No_encontrado.update(saleforce)
+                No_encontrado["ositel"]=""
                 #print(No_encontrado)
                 return No_encontrado
         elif response.status_code == 401:
@@ -122,7 +126,8 @@ def varios(nombreArchivo):
         "Nodo",
         "Sub segmento global",
         "Sub segmento local",
-        "contacto"]
+        "contacto",
+        "ositel"]
     
     df_final = pd.json_normalize(lista_json)
     df_final_ordenado = df_final[orden_columnas]
