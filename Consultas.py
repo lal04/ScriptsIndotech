@@ -6,13 +6,14 @@ import os
 import re
 from src.token import Token
 from src.saleforce import Saleforce
-from src.ositel import Ositel
+from src.osiptel import Osiptel
 import shutil
 import requests
 from concurrent.futures import ThreadPoolExecutor
 tk=Token()
  #creamos el incio de sesion salea force
 sf=Saleforce()
+osiptel=Osiptel()
 sf.inicio_sesion()
 
 inicio = time.time()
@@ -36,7 +37,7 @@ def consultar_ruc(ruc, token):
         print(ruc)
         url = f"https://dniruc.apisperu.com/api/v1/ruc/{ruc}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{token}"
         response = requests.get(url,timeout=timeout)
-        campos_a_consultar=["Nodo", "Sub segmento global", "Sub segmento local", "contacto"]
+        campos_a_consultar=["Nodo", "contacto"]
         saleforce=sf.consultar_sale(ruc,campos_a_consultar )
         if response.status_code == 200:
             data = response.json()
@@ -50,8 +51,8 @@ def consultar_ruc(ruc, token):
                     "fecha": datetime.datetime.now().strftime("%d/%m/%Y")
                 }
                 data_con_fecha.update(data_filtrado)
-                
-                data_con_fecha["ositel"]=Ositel().consulta_ostitel(ruc)
+                data_con_fecha["osiptel"]=osiptel.consulta_osiptel(ruc)
+ 
                 return data_con_fecha
             else:
                 # Si "success" es Falso, devuelve un diccionario personalizado
@@ -61,7 +62,7 @@ def consultar_ruc(ruc, token):
                     "estado": "No activo",
                 }
                 No_encontrado.update(saleforce)
-                No_encontrado["ositel"]=""
+                No_encontrado["osiptel"]=""
                 #print(No_encontrado)
                 return No_encontrado
         elif response.status_code == 401:
@@ -124,10 +125,8 @@ def varios(nombreArchivo):
         "provincia",
         "distrito",
         "Nodo",
-        "Sub segmento global",
-        "Sub segmento local",
         "contacto",
-        "ositel"]
+        "osiptel"]
     
     df_final = pd.json_normalize(lista_json)
     df_final_ordenado = df_final[orden_columnas]

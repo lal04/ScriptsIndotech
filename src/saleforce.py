@@ -5,11 +5,6 @@ import time
 import os
 class Saleforce:
     def __init__(self) -> None:
-        """
-        Inicializa una instancia de la clase Saleforce.
-        Carga las variables de entorno desde el archivo .env para obtener las credenciales de usuario.
-        Establece una sesión de requests y una variable para rastrear el estado de inicio de sesión.
-        """
         # Cargar las variables de entorno desde el archivo .env
         load_dotenv()
         self.user=os.getenv("USUARIO_SALEFORCE")
@@ -18,11 +13,6 @@ class Saleforce:
         self.estado_de_sesion = False  # Variable para rastrear el estado de inicio de sesión
 
     def inicio_sesion(self):
-        """
-        Inicia sesión en el sistema de Salesforce utilizando las credenciales almacenadas.
-        La sesión se mantiene activa para realizar solicitudes posteriores.
-        Solo se intentará iniciar sesión si no se ha hecho previamente.
-        """
         if not self.estado_de_sesion:  # Solo iniciar sesión si no está ya iniciada
             data = {
                 'username': self.user,
@@ -38,17 +28,6 @@ class Saleforce:
                 print("Error en el inicio de sesión")
                 
     def consultar_sale(self,ruc,campos=["Pc", "Nodo", "Sub segmento global","Sub segmento local","contacto"]):
-        """
-        Consulta la información de un RUC en Salesforce.
-        
-        Parámetros:
-        - ruc: El número de RUC a consultar.
-        - campos: Lista de campos específicos que se desean obtener. Por defecto se obtienen Pc, Nodo, Sub segmento global, Sub segmento local y contacto.
-        
-        Retorna:
-        - data_saleForce: Diccionario con la información solicitada. Si algún campo no está disponible, se retorna con un valor vacío.
-        """
-
         data_saleForce={}
         try:
             timeout=(400,1200)
