@@ -116,8 +116,11 @@ class Osiptel:
 
                 return resultado
             else:
-                print("Ocurrió un error consulta Osiptel")
-                print(r.status_code)
+                print(f'error consulta ositel\ne {ruc}')
+                resultado=self.consulta_osiptel(ruc)
+                if resultado:
+                    return resultado
+                
                 return False
         else:
             return ''

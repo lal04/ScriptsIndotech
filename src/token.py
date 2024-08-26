@@ -112,7 +112,7 @@ class Token:
                 tk.write(f"{token_encriptado}\n")
 
         print("Tokens ordenados y actualizados en token.txt")
-        print(f"tokens activos: {tk_activos}\n tokens no activos: {tk_no_activos}")
+        print(f"tokens activos: {tk_activos}\ntokens no activos: {tk_no_activos}")
 
 
                 
