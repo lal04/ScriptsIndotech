@@ -93,15 +93,20 @@ class Navegador:
             input.clear()
             input.send_keys(mensaje)
     @manejar_errores   
-    def buscar_elemento_xpath(self,xpath:str=None, etiqueta:str=None, clase:str=None):
+    def buscar_elemento_xpath(self,xpath:str=None, etiqueta:str=None, clase:str=None, nombre:str=None, elemento=None):
+        if elemento is None:
+            elemento=self.driver
+            
         if xpath:
             
-            return self.driver.find_element(By.XPATH, f'{xpath}')
+            return elemento.find_element(By.XPATH, f'{xpath}')
         elif clase:
-            return self.driver.find_element(By.CLASS_NAME, f'{clase}')
+            return elemento.find_element(By.CLASS_NAME, f'{clase}')
         elif etiqueta:
             
-            return self.driver.find_elements(By.TAG_NAME, f'{etiqueta}')
+            return elemento.find_elements(By.TAG_NAME, f'{etiqueta}')
+        elif nombre:
+            return elemento.find_element(By.NAME, f'{nombre}')
         
     def scroll(self, elemento=None)->None:
         if elemento:
