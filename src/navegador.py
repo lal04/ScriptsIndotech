@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException,NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
@@ -94,19 +94,22 @@ class Navegador:
             input.send_keys(mensaje)
     @manejar_errores   
     def buscar_elemento_xpath(self,xpath:str=None, etiqueta:str=None, clase:str=None, nombre:str=None, elemento=None):
-        if elemento is None:
-            elemento=self.driver
-            
-        if xpath:
-            
-            return elemento.find_element(By.XPATH, f'{xpath}')
-        elif clase:
-            return elemento.find_element(By.CLASS_NAME, f'{clase}')
-        elif etiqueta:
-            
-            return elemento.find_elements(By.TAG_NAME, f'{etiqueta}')
-        elif nombre:
-            return elemento.find_element(By.NAME, f'{nombre}')
+        try: 
+            if elemento is None:
+                elemento=self.driver
+                
+            if xpath:
+                
+                return elemento.find_element(By.XPATH, f'{xpath}')
+            elif clase:
+                return elemento.find_element(By.CLASS_NAME, f'{clase}')
+            elif etiqueta:
+                
+                return elemento.find_elements(By.TAG_NAME, f'{etiqueta}')
+            elif nombre:
+                return elemento.find_element(By.NAME, f'{nombre}')
+        except NoSuchElementException:
+            return False
         
     def scroll(self, elemento=None)->None:
         if elemento:
@@ -152,7 +155,7 @@ class Navegador:
                     if len(datos_filas)==cantidad_de_filas:
                         break
                 
-            filas=',      '.join(datos_filas)
+            filas=', '.join(datos_filas)
             return filas
         except:
             return 'Sin datos'
