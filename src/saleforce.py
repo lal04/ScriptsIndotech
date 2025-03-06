@@ -84,16 +84,18 @@ class Saleforce:
                             for fila in filas:
                                 # Encontrar todas las celdas de la fila
                                 celdas = fila.find_all(['td', 'th'])
-                                # Extraer el texto de cada celda y añadirlo a la lista de datos
+                                # Extraer el texto de cada celda y añadirlo a la lista de datos                       
                                 datos_fila = [celda.get_text(strip=True) for celda in celdas]
-                                datos_tabla.append(datos_fila)
+                                datos_fila.pop(0)
+                                
+                                datos_tabla.append(' '.join(datos_fila))
                                 # Eliminar la primera fila
                                 sinEncabezado = datos_tabla[1:]
-                                data_saleForce[campo]=sinEncabezado
+                                data_saleForce[campo]=', '.join(sinEncabezado)
 
                 return data_saleForce
         except requests.exceptions.ConnectionError as e:
             print(f"Error de conexión en consultar_sale: {e}")
             print(f"consulta sale, esperamos {tiempo_nuevo_intento} segundos...")
             time.sleep(tiempo_nuevo_intento)
-            return self.consultar_sale(ruc)  # Reintento de la solicitud}
+            return self.consultar_sale(ruc)  # Reintento de la solicitud
