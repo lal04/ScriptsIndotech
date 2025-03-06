@@ -76,26 +76,20 @@ class Sunat(Navegador):
             
             self.scroll()
             
-            representantes_legales=self.buscar_elemento_xpath('/html/body/div[1]/div[2]/div/div[5]/div[3]/div[3]/form/button')
-            representantes_legales.send_keys(Keys.RETURN)
-           
-            representantes=self._extraer_datos_tabla('/html/body/div/div[2]/div[2]/div[2]/div/div/table/tbody',columnas_especifico=[2,3,4])
-            ####################################################################
-            ###################################################################
+         
+            representantes_legales=self.buscar_elemento_xpath(nombre='formRepLeg')
+            if not representantes_legales:
+                representantes='No se encontraron representantes legales'
+            else:
             
+                representantes_legales=representantes_legales.find_element("tag name", "button")
+                representantes_legales.send_keys(Keys.RETURN)
         
-        
-            
-
-            # retornar datos extraídos de Sunat
-            resultado = f"""
-                          
-                            Representantes legales: {representantes}
-                            """
-            
+                representantes=self._extraer_datos_tabla('/html/body/div/div[2]/div[2]/div[2]/div/div/table/tbody',columnas_especifico=[2,3,4])
+                
             self.driver.get('https://e-consultaruc.sunat.gob.pe/')
             
-            return resultado        
+            return representantes        
         except Exception as e:
 
             print('Error en consulta Sunat con Selenium')

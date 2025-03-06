@@ -22,4 +22,8 @@ class Utilidades:
         data_frame =pd.read_excel(ruta_completa)
         
         return data_frame
+    
+    @staticmethod
+    def limpiar_consola():
+        os.system('cls' if os.name == 'nt' else 'clear')
         
