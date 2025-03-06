@@ -8,8 +8,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager  # Descarga y gestiona ChromeDriver automáticamente
-from src.osiptel import Osiptel
-from src.saleforce import Saleforce
 from selenium.webdriver.common.action_chains import ActionChains
 
 TIEMPO_DE_ESPERA=10
@@ -49,8 +47,6 @@ class Navegador:
         self.tabs = [self.driver.current_window_handle]  # Guarda la referencia de la pestaña inicial
         self.espera = WebDriverWait(self.driver, TIEMPO_DE_ESPERA)
         self.accion=ActionChains(self.driver)
-        self.saleforce=Saleforce()
-        self.osiptel=Osiptel()
         
     @staticmethod
     def manejar_errores(fun):
