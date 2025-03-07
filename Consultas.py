@@ -6,14 +6,14 @@ import os
 import re
 from src.token import Token
 from src.saleforce import Saleforce
-from src.osiptel import Osiptel
+#from src.osiptel import Osiptel
 import shutil
 import requests
 from concurrent.futures import ThreadPoolExecutor
 tk=Token()
  #creamos el incio de sesion salea force
 sf=Saleforce()
-osiptel=Osiptel()
+#osiptel=Osiptel()
 sf.inicio_sesion()
 
 inicio = time.time()
@@ -51,7 +51,7 @@ def consultar_ruc(ruc, token):
                     "fecha": datetime.datetime.now().strftime("%d/%m/%Y")
                 }
                 data_con_fecha.update(data_filtrado)
-                data_con_fecha["osiptel"]=osiptel.consulta_osiptel(ruc)
+                #data_con_fecha["osiptel"]=osiptel.consulta_osiptel(ruc)
  
                 return data_con_fecha
             else:
@@ -62,8 +62,7 @@ def consultar_ruc(ruc, token):
                     "estado": "No activo",
                 }
                 No_encontrado.update(saleforce)
-                No_encontrado["osiptel"]=""
-                #print(No_encontrado)
+                #No_encontrado["osiptel"]=""
                 return No_encontrado
         elif response.status_code == 401:
             # Cambia el token e intenta nuevamente
@@ -125,8 +124,7 @@ def varios(nombreArchivo):
         "provincia",
         "distrito",
         "Nodo",
-        "contacto",
-        "osiptel"]
+        "contacto"]
     
     df_final = pd.json_normalize(lista_json)
     df_final_ordenado = df_final[orden_columnas]
