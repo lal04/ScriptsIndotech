@@ -46,7 +46,7 @@ class Sunat(Navegador):
         Returns:
             str: Un string con los datos obtenidos de la consulta o un mensaje de error si ocurre un problema.
         """
-        self.activar_pestana()
+        #self.activar_pestana()
         try:
         
             self.llenar_input(ruc, xpath_input='/html/body/div[1]/div[2]/div/div[2]/div[2]/form/div[1]/div/input')
